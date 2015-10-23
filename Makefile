@@ -30,7 +30,7 @@ TAP		:= ./node_modules/.bin/tap
 #
 # Files
 #
-DOC_FILES	 = index.md boilerplateapi.md
+DOC_FILES	 = index.md
 JS_FILES	:= $(shell ls *.js) $(shell find lib test -name '*.js')
 JSON_FILES	 = package.json
 JSL_CONF_NODE	 = tools/jsl.node.conf
@@ -38,7 +38,6 @@ JSL_FILES_NODE	 = $(JS_FILES)
 JSSTYLE_FILES	 = $(JS_FILES)
 JSSTYLE_FLAGS	 = -f tools/jsstyle.conf
 REPO_MODULES	 = src/node-dummy
-SMF_MANIFESTS_IN = smf/manifests/bapi.xml.in
 
 NODE_PREBUILT_VERSION=v0.8.28
 
@@ -53,13 +52,12 @@ ifeq ($(shell uname -s),SunOS)
 else
 	include ./tools/mk/Makefile.node.defs
 endif
-include ./tools/mk/Makefile.smf.defs
 
 #
 # Repo-specific targets
 #
 .PHONY: all
-all: $(SMF_MANIFESTS) | $(TAP) $(REPO_DEPS)
+all: $(TAP) $(REPO_DEPS)
 	$(NPM) rebuild
 
 $(TAP): | $(NPM_EXEC)
@@ -77,5 +75,4 @@ ifeq ($(shell uname -s),SunOS)
 else
 	include ./tools/mk/Makefile.node.targ
 endif
-include ./tools/mk/Makefile.smf.targ
 include ./tools/mk/Makefile.targ

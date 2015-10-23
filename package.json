@@ -5,13 +5,22 @@
   "author": "Joyent (joyent.com)",
   "private": true,
   "dependencies": {
-    "restify": "2.2.1",
-    "node-uuid": "1.4.0",
+    "assert-plus": "0.1.5",
+    "bunyan": "0.18.2",
     "filed": "0.0.5",
-    "bunyan": "0.18.2"
+    "moray": "git://github.com/joyent/node-moray",
+    "node-libuuid": "^1.1.0",
+    "node-uuid": "1.4.0",
+    "restify": "2.2.1",
+    "vasync": "1.6.3",
+    "vstream": "0.1.0",
+    "watershed": "0.3.0"
   },
   "devDependencies": {
     "tap": "0.4.0"
+  },
+  "optionalDependencies": {
+    "dtrace-provider": "0.2.8"
   },
   "scripts": {
     "start": "node ./server.js",
