@@ -16,7 +16,7 @@ var mod_bunyan = require('bunyan');
 var mod_listener = require('../../lib/listener');
 
 var options = {
-    log: new mod_bunyan({
+    log: mod_bunyan.createLogger({
         name: 'listener_test',
         level: process.env['LOG_LEVEL'] || 'info',
         stream: process.stderr
@@ -30,7 +30,7 @@ var options = {
     }
 };
 var options2 = {
-    log: new mod_bunyan({
+    log: mod_bunyan.createLogger({
         name: 'listener_test2',
         level: process.env['LOG_LEVEL'] || 'info',
         stream: process.stderr

@@ -10,7 +10,7 @@
 
 /* Test the publisher components */
 
-var test = require('tap').test;
+var test = require('tape');
 var mod_publisher = require('../lib/publisher');
 var mod_bunyan = require('bunyan');
 var mod_restify = require('restify');
@@ -18,7 +18,7 @@ var mod_restify = require('restify');
 
 var server = mod_restify.createServer();
 var options = {
-    log: new mod_bunyan({
+    log: mod_bunyan.createLogger({
         name: 'publisher_test',
         level: process.env['LOG_LEVEL'] || 'info',
         stream: process.stderr
@@ -36,6 +36,7 @@ var options = {
 };
 
 test('test publisher moray operations', function (t) {
+    t.plan(4);
     var testChange = {
         changeKind: {
             resource: 'vm',
@@ -62,8 +63,5 @@ test('test publisher moray operations', function (t) {
             t.ok(true, 'all items published');
             publisher.stop();
         });
-
     });
-
-    t.end();
 });

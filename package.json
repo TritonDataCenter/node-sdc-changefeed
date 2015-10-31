@@ -1,30 +1,27 @@
 {
-  "name": "node-sdc-changefeed",
+  "name": "sdc-changefeed",
   "description": "SmartDataCenter Change Feed Modules",
   "version": "1.0.0",
   "author": "Joyent (joyent.com)",
-  "private": true,
+  "private": false,
   "dependencies": {
-    "assert-plus": "0.1.5",
-    "bunyan": "0.18.2",
-    "filed": "0.0.5",
-    "moray": "git://github.com/joyent/node-moray",
-    "node-libuuid": "^1.1.0",
-    "node-uuid": "1.4.0",
-    "restify": "2.2.1",
+    "bunyan": "1.5.1",
+    "libuuid": "0.1.4",
+    "moray": "git+ssh://git@github.com:joyent/node-moray.git#b4730b6",
+    "restify": "4.0.3",
     "vasync": "1.6.3",
     "vstream": "0.1.0",
-    "watershed": "0.3.0"
+    "watershed": "0.3.1"
   },
   "devDependencies": {
-    "tap": "0.4.0"
+    "tape": "4.2.2"
   },
   "optionalDependencies": {
-    "dtrace-provider": "0.2.8"
+    "dtrace-provider": "0.6.0"
   },
   "scripts": {
     "start": "node ./server.js",
-    "test": "./node_modules/.bin/tap test/*.test.js"
+    "test": "./node_modules/.bin/tape test/*.test.js"
   },
   "license": "MPL-2.0"
 }

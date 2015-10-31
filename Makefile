@@ -25,7 +25,7 @@
 #
 # Tools
 #
-TAP		:= ./node_modules/.bin/tap
+TAPE		:= ./node_modules/.bin/tape
 
 #
 # Files
@@ -39,7 +39,7 @@ JSSTYLE_FILES	 = $(JS_FILES)
 JSSTYLE_FLAGS	 = -f tools/jsstyle.conf
 REPO_MODULES	 = src/node-dummy
 
-NODE_PREBUILT_VERSION=v0.8.28
+NODE_PREBUILT_VERSION=v0.10.40
 
 ifeq ($(shell uname -s),SunOS)
 	NODE_PREBUILT_CC_VERSION=4.6.2
@@ -57,17 +57,17 @@ endif
 # Repo-specific targets
 #
 .PHONY: all
-all: $(TAP) $(REPO_DEPS)
+all: $(TAPE) $(REPO_DEPS)
 	$(NPM) rebuild
 
-$(TAP): | $(NPM_EXEC)
+$(TAPE): | $(NPM_EXEC)
 	$(NPM) install
 
-CLEAN_FILES += $(TAP) ./node_modules/tap
+CLEAN_FILES += $(TAPE) ./node_modules/tap
 
 .PHONY: test
-test: $(TAP)
-	TAP=1 $(TAP) test/*.test.js
+test: $(TAPE)
+	TAPE=1 $(TAPE) test/*.test.js
 
 include ./tools/mk/Makefile.deps
 ifeq ($(shell uname -s),SunOS)

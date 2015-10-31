@@ -12,14 +12,14 @@
 /* Test the publisher components */
 
 var Publisher = require('../../lib/publisher');
-var Bunyan = require('bunyan');
-var restify = require('restify');
-var libuuid = require('node-libuuid');
+var mod_bunyan = require('bunyan');
+var mod_restify = require('restify');
+var mod_libuuid = require('libuuid');
 
-var client = restify.createJsonClient({
+var client = mod_restify.createJsonClient({
     url: 'http://localhost:8080'
 });
-var server = restify.createServer();
+var server = mod_restify.createServer();
 var resources = [
     {
         resource: 'vm',
@@ -28,7 +28,7 @@ var resources = [
     }
 ];
 var options = {
-    log: new Bunyan({
+    log: mod_bunyan.createLogger({
         name: 'publisher_test',
         level: process.env['LOG_LEVEL'] || 'trace',
         stream: process.stderr
@@ -70,11 +70,11 @@ publisher.on('moray-ready', function () {
     var changes = process.argv[2];
     var changes2 = process.argv[3];
     for (var i = 0; i < changes; i++) {
-        testChange.changedResourceId = libuuid.v4();
+        testChange.changedResourceId = mod_libuuid.create();
         publisher.publish(testChange, publishHandler);
     }
     for (var j = 0; j < changes2; j++) {
-        testChange2.changedResourceId = libuuid.v4();
+        testChange2.changedResourceId = mod_libuuid.create();
         publisher.publish(testChange2, publishHandler);
     }
 

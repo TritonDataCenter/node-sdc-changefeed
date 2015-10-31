@@ -10,10 +10,10 @@
 
 /* Test the publisher components */
 
-var test = require('tap').test;
+var test = require('tape');
+var spawn = require('child_process').spawn;
 var mod_restify = require('restify');
-var mod_spawn = require('child_process').spawn;
-var mod_watershed = require('watershed').Watershed;
+var Watershed = require('watershed').Watershed;
 var mod_http = require('http');
 var mod_bunyan = require('bunyan');
 var mod_listener = require('../lib/listener');
@@ -21,7 +21,7 @@ var mod_util = require('util');
 
 test('test publisher change feed list', function (t) {
     t.plan(6);
-    var server = mod_spawn('./helper/mock-publisher.js', ['0', '0']);
+    var server = spawn('./test/helper/mock-publisher.js', ['0', '0']);
     var client = mod_restify.createJsonClient({
         url: 'http://localhost:8080'
     });
@@ -34,15 +34,15 @@ test('test publisher change feed list', function (t) {
                 bootstrapRoute: '/vms'
             }
         ];
-        var resource = resources[0];
         var subResources = resources[0].subResources;
         var subLen = subResources.length;
+        var bootstrapRoute = resources[0].bootstrapRoute;
         t.equal(obj.length, 1, '1 resource');
-        t.equal(obj[0].resource, resources[0].resource, 'resource equality');
+        t.equal(obj[0].resource, resources[0].resource, 'resource equal');
         t.equal(obj[0].subResources.length, subLen, 'subResources length');
         t.equal(obj[0].subResources[0], subResources[0], 'subResources[0]');
         t.equal(obj[0].subResources[1], subResources[1], 'subResources[1]');
-        t.equal(obj[0].bootstrapRoute, resource.bootstrapRoute, 'bootstrap');
+        t.equal(obj[0].bootstrapRoute, bootstrapRoute, 'bootstrap');
         server.kill('SIGHUP');
         t.end();
     });
@@ -50,15 +50,14 @@ test('test publisher change feed list', function (t) {
 
 test('test publisher change feed stats with no listeners', function (t) {
     t.plan(2);
-    var server = mod_spawn('./helper/mock-publisher.js', ['0', '0']);
+    var server = spawn('./test/helper/mock-publisher.js', ['0', '0']);
     var client = mod_restify.createJsonClient({
         url: 'http://localhost:8080'
     });
 
     client.get('/change-feeds/stats', function (err, req, res, obj) {
         t.equal(obj.listeners, 0, 'listener count 0');
-        t.equal(Object.keys(obj.registrations).length, 0, 'registrations {}');
-
+        t.equal(Object.keys(obj.registrations).length, 0, 'registrations');
         server.kill('SIGHUP');
         t.end();
     });
@@ -66,7 +65,7 @@ test('test publisher change feed stats with no listeners', function (t) {
 
 test('test publisher change feed stats with listeners', function (t) {
     t.plan(2);
-    var publisher = mod_spawn('./helper/mock-publisher.js', ['0', '0']);
+    var publisher = spawn('./test/helper/mock-publisher.js', ['0', '0']);
     var client = mod_restify.createJsonClient({
         url: 'http://localhost:8080'
     });
@@ -120,14 +119,15 @@ test('test publisher change feed stats with listeners', function (t) {
         });
     });
 
-    publisher.once('close', function (code) {
+    publisher.on('close', function (code) {
+        // console.log('child process exited with code ' + code);
         t.end();
     });
 });
 
 test('test publisher change feed stats after removal', function (t) {
     t.plan(6);
-    var publisher = mod_spawn('./helper/mock-publisher.js', ['0', '0']);
+    var publisher = spawn('./test/helper/mock-publisher.js', ['0', '0']);
     var client = mod_restify.createJsonClient({
         url: 'http://localhost:8080'
     });
@@ -201,7 +201,8 @@ test('test publisher change feed stats after removal', function (t) {
         });
     });
 
-    publisher.once('close', function (code) {
+    publisher.on('close', function (code) {
+        // console.log('child process exited with code ' + code);
         t.end();
     });
 });

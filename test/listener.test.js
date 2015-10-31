@@ -11,15 +11,15 @@
 /* Test the listener components */
 
 
-var test = require('tap').test;
+var test = require('tape');
 var mod_bunyan = require('bunyan');
 var mod_listener = require('../lib/listener');
 var mod_spawn = require('child_process').spawn;
 
 var options = {
-    log: new mod_bunyan({
+    log: mod_bunyan.createLogger({
         name: 'listener_test',
-        level: process.env['LOG_LEVEL'] || 'info',
+        level: process.env['LOG_LEVEL'] || 'error',
         stream: process.stderr
     }),
     endpoint: '127.0.0.1',
@@ -31,9 +31,9 @@ var options = {
     }
 };
 var options2 = {
-    log: new mod_bunyan({
+    log: mod_bunyan.createLogger({
         name: 'listener_test2',
-        level: process.env['LOG_LEVEL'] || 'info',
+        level: process.env['LOG_LEVEL'] || 'error',
         stream: process.stderr
     }),
     endpoint: '127.0.0.1',
@@ -49,7 +49,7 @@ var serverKilled = false;
 
 test('test listener creation', function (t) {
     t.plan(33);
-    var server = mod_spawn('./helper/mock-publisher.js', ['10', '5']);
+    var server = mod_spawn('./test/helper/mock-publisher.js', ['10', '5']);
     var itemsProcessed = 0;
     var itemsProcessed2 = 0;
     server.stderr.once('data', function (data) {
@@ -63,11 +63,11 @@ test('test listener creation', function (t) {
         listener2.register();
 
         listener.on('bootstrap', function () {
-            console.log('bootstrap');
+            // console.log('bootstrap');
             t.ok(true, 'listener bootstrap called');
         });
         listener2.on('bootstrap', function () {
-            console.log('bootstrap2');
+            // console.log('bootstrap2');
             t.ok(true, 'listener2 bootstrap called');
         });
 
@@ -75,10 +75,10 @@ test('test listener creation', function (t) {
             var changeItem = listener.read();
             t.equal(typeof (changeItem), 'object', 'changeItem is object');
             itemsProcessed++;
-            var processedItem1 = changeItem.changeKind;
-            console.log('listener resource:%j subResources:%j',
-                processedItem1.resource,
-                processedItem1.subResources);
+            // var processedItem1 = changeItem.changeKind;
+            // console.log('listener resource:%j subResources:%j',
+            //     processedItem1.resource,
+            //     processedItem1.subResources);
             if (itemsProcessed === 14) {
                 t.equal(itemsProcessed, 14, 'listener 15 changes');
             }
@@ -87,10 +87,10 @@ test('test listener creation', function (t) {
             var changeItem = listener2.read();
             t.equal(typeof (changeItem), 'object', 'changeItem is object');
             itemsProcessed2++;
-            var processedItem2 = changeItem.changeKind;
-            console.log('listener2 resource:%j subResources:%j',
-                processedItem2.resource,
-                processedItem2.subResources);
+            // var processedItem2 = changeItem.changeKind;
+            // console.log('listener2 resource:%j subResources:%j',
+            //     processedItem2.resource,
+            //     processedItem2.subResources);
             if (itemsProcessed2 === 9) {
                 t.equal(itemsProcessed2, 9, 'listener2 10 changes');
             }
@@ -107,7 +107,9 @@ test('test listener creation', function (t) {
         // Detect that the publisher has no items to publish and quit
         if (data.toString().indexOf('no-items') > -1) {
             // console.log('STDOUT: %s', data.toString());
-            server.kill('SIGHUP');
+            setTimeout(function () {
+                server.kill('SIGHUP');
+            }, 2000);
         }
         // console.log('STDOUT: ' + data.toString());
     });
