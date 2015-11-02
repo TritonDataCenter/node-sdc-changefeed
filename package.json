@@ -1,6 +1,6 @@
 {
-  "name": "sdc-changefeed",
-  "description": "SmartDataCenter Change Feed Modules",
+  "name": "changefeed",
+  "description": "Change Feed Modules",
   "version": "1.0.0",
   "author": "Joyent (joyent.com)",
   "private": false,
@@ -8,6 +8,7 @@
     "bunyan": "1.5.1",
     "libuuid": "0.1.4",
     "moray": "git+ssh://git@github.com:joyent/node-moray.git#b4730b6",
+    "posix-getopt": "1.2.0",
     "restify": "4.0.3",
     "vasync": "1.6.3",
     "vstream": "0.1.0",

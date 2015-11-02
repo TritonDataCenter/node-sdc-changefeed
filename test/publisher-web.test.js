@@ -26,7 +26,7 @@ test('test publisher change feed list', function (t) {
         url: 'http://localhost:8080'
     });
 
-    client.get('/change-feeds', function (err, req, res, obj) {
+    client.get('/changefeeds', function (err, req, res, obj) {
         var resources = [
             {
                 resource: 'vm',
@@ -55,7 +55,7 @@ test('test publisher change feed stats with no listeners', function (t) {
         url: 'http://localhost:8080'
     });
 
-    client.get('/change-feeds/stats', function (err, req, res, obj) {
+    client.get('/changefeeds/stats', function (err, req, res, obj) {
         t.equal(obj.listeners, 0, 'listener count 0');
         t.equal(Object.keys(obj.registrations).length, 0, 'registrations');
         server.kill('SIGHUP');
@@ -108,7 +108,7 @@ test('test publisher change feed stats with listeners', function (t) {
         listener.on('bootstrap', function () {
             listener2.register();
             listener2.on('bootstrap', function () {
-                var statsPath = '/change-feeds/stats';
+                var statsPath = '/changefeeds/stats';
                 client.get(statsPath, function (err, req, res, obj) {
                     var regCount = Object.keys(obj.registrations).length;
                     t.equal(obj.listeners, 2, 'listener count 2');
@@ -165,7 +165,7 @@ test('test publisher change feed stats after removal', function (t) {
 
         var listener = new mod_listener(options);
         var listener2 = new mod_listener(options2);
-        var statsPath = '/change-feeds/stats';
+        var statsPath = '/changefeeds/stats';
 
         listener.register();
         listener.on('bootstrap', function () {

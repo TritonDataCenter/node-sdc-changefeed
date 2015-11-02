@@ -17,7 +17,7 @@ Provides support for publishing and listening to change feeds in SmartDataCenter
 ## Installation
 
 ```
-$ npm install node-sdc-changefeed       # use -g if you'd like the CLI portion
+$ npm install changefeed
 ```
 
 
@@ -33,18 +33,66 @@ $ make test       # run tests
 
 ## Test
 
-Simple tests can be run using:
+Simple tests (requires a running CoaL) can be run using:
 
 ```
 $ make test
 ```
 
-If you'd like to integration test against CoaL:
+## Setup
+
+Publisher
 
 ```
-$ make test-integration-in-coal
+var mod_bunyan = require('bunyan');
+var mod_changefeed = require('changefeed');
+var mod_restify = require('restify');
+
+var options = {
+    log: mod_bunyan.createLogger({
+        name: 'publisher_test',
+        level: process.env['LOG_LEVEL'] || 'trace',
+        stream: process.stderr
+    }),
+    morayBucketName: 'pub_change_bucket',
+    morayHost: '10.99.99.17',
+    morayResolvers: {
+        resolvers: ['10.99.99.11']
+    },
+    morayTimeout: 200,
+    morayMinTimeout: 1000,
+    morayMaxTimeout: 2000,
+    morayPort: 2020,
+    restifyServer: server,
+    resources: resources
+};
+
+var publisher = mod_changefeed.createPublisher(options);
 ```
 
+Listener
+
+```
+var mod_bunyan = require('bunyan');
+var mod_changefeed = require('changefeed');
+
+var options = {
+    log: mod_bunyan.createLogger({
+        name: 'listener_test',
+        level: process.env['LOG_LEVEL'] || 'error',
+        stream: process.stderr
+    }),
+    endpoint: '127.0.0.1',
+    instance: 'uuid goes here',
+    service: 'tcns',
+    changeKind: {
+        resource: 'vm',
+        subResources: ['nic', 'alias']
+    }
+};
+
+var listener = mod_changefeed.createListener(options);
+```
 
 ## Documentation
 

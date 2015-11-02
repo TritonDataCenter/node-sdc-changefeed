@@ -54,8 +54,7 @@ publisher.on('moray-ready', function () {
             resource: 'vm',
             subResources: ['nic']
         },
-        changedResourceId: '',
-        published: 'no'
+        changedResourceId: ''
     };
 
     var testChange2 = {
@@ -63,8 +62,7 @@ publisher.on('moray-ready', function () {
             resource: 'vm',
             subResources: ['alias']
         },
-        changedResourceId: '',
-        published: 'no'
+        changedResourceId: ''
     };
 
     var changes = process.argv[2];
