@@ -76,13 +76,16 @@ publisher.on('moray-ready', function () {
         publisher.publish(testChange2, publishHandler);
     }
 
-    // setTimeout(function () {
-    //     console.log('Publishing bonus round!');
-    //     for (var i = 0; i < changes; i++) {
-    //         testChange.changedResourceId = libuuid.v4();
-    //         publisher.publish(testChange, publishHandler);
-    //     }
-    // }, 20000);
+    if (process.argv[4] === 'bonus') {
+        setInterval(function () {
+            console.log('Publishing bonus round!');
+            for (var i = 0; i < changes; i++) {
+                testChange.changedResourceId = mod_libuuid.create();
+                publisher.publish(testChange, publishHandler);
+            }
+        }, 2000);
+    }
+
 
     publisher.start();
     publisher.on('item-published', function () {

@@ -1,0 +1,120 @@
+#!/usr/bin/env node
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
+/*
+ * Copyright (c) 2015, Joyent, Inc.
+ */
+
+var mod_assert = require('assert');
+var mod_bunyan = require('bunyan');
+var mod_changefeed = require('../lib');
+var mod_getopt = require('posix-getopt');
+var mod_libuuid = require('libuuid');
+
+
+var uuid = mod_libuuid.create();
+var opts = {
+    log: mod_bunyan.createLogger({
+        name: 'changefeedsnoop',
+        level: process.env['LOG_LEVEL'] || 'error',
+        stream: process.stderr
+    }),
+    endpoint: '127.0.0.1',
+    port: 80,
+    instance: uuid,
+    service: 'changefeedsnoop',
+    changeKind: {
+        resource: undefined,
+        subResources: undefined
+    }
+}
+
+var message = [
+    'use: changefeedsnoop [-h host] [-p port] [-r resource] [-s sub1,sub2,...]',
+    '',
+    'Snoops change feed items published by the provided host, that pertain to ',
+    'the specified <resource> and <sub-resources>.',
+    '',
+    'The following parameters are required:',
+    '',
+    '       -r resource        Top level resource for which to snoop changes ',
+    '                          for. For example, "vm".',
+    '',
+    '       -s sub-resources   Properties of the specified resource for which ',
+    '                          to filter by. For example, "alias,nic"',
+    '',
+    'The following options may be provided:',
+    '',
+    '       -h host            The IP or DNS entry for the publisher to snoop.',
+    '',
+    '       -p port            The port on the publisher to connect to.',
+    '',
+    'Example: using vmapi.coal.joyent.us, show all changes to VMs that pertain',
+    'to a nic or alias property:',
+    '',
+    '       changefeedsnoop -h vmapi.coal.joyent.us -r vm -s nic,alias',
+    ''
+].join('\n');
+
+function usage() {
+    console.error(message);
+    process.exit(1);
+}
+
+function main() {
+    parseOptions();
+    if (opts.changeKind.resource === undefined) {
+        usage();
+    }
+
+    if (opts.changeKind.subResources === undefined) {
+        usage();
+    }
+
+    var listener = new mod_changefeed.createListener(opts);
+    listener.register();
+
+    listener.on('bootstrap', function () {
+        console.log('bootstrap received');
+    });
+
+    listener.on('readable', function () {
+        var changeItem = listener.read();
+        console.log('%j', changeItem);
+    });
+}
+
+function parseOptions() {
+    var parser, option;
+    parser = new mod_getopt.BasicParser('h:p:r:s:', process.argv);
+    while ((option = parser.getopt()) !== undefined) {
+        if (option['errror']) {
+            usage();
+        }
+
+        switch (option.option) {
+            case 'h':
+                opts.endpoint = option.optarg;
+                break;
+            case 'p':
+                opts.port = option.optarg;
+                break;
+            case 'r':
+                opts.changeKind.resource = option.optarg;
+                break;
+            case 's':
+                opts.changeKind.subResources = option.optarg.split(',');
+                break;
+            default:
+                /* error message already emitted by getopt */
+                mod_assert.equal('?', option.option);
+                break;
+        }
+    }
+}
+
+main();
