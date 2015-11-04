@@ -54,17 +54,20 @@ var options = {
         level: process.env['LOG_LEVEL'] || 'trace',
         stream: process.stderr
     }),
-    morayBucketName: 'pub_change_bucket',
-    morayHost: '10.99.99.17',
-    morayResolvers: {
-        resolvers: ['10.99.99.11']
-    },
-    morayTimeout: 200,
-    morayMinTimeout: 1000,
-    morayMaxTimeout: 2000,
-    morayPort: 2020,
+    moray: {
+        bucketName: 'pub_change_bucket',
+        host: '10.99.99.17',
+        resolvers: {
+            resolvers: ['10.99.99.11']
+        },
+        timeout: 200,
+        minTimeout: 1000,
+        maxTimeout: 2000,
+        port: 2020
+    }
     restifyServer: server,
-    resources: resources
+    resources: resources,
+    maxAge: 2000
 };
 
 var publisher = mod_changefeed.createPublisher(options);
