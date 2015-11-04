@@ -23,6 +23,7 @@ var options = {
         stream: process.stderr
     }),
     endpoint: '127.0.0.1',
+    port: 8080,
     instance: 'uuid goes here',
     service: 'tcns',
     changeKind: {
@@ -37,6 +38,7 @@ var options2 = {
         stream: process.stderr
     }),
     endpoint: '127.0.0.1',
+    port: 8080,
     instance: 'uuid goes here2',
     service: 'tcns2',
     changeKind: {

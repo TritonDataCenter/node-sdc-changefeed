@@ -15,7 +15,13 @@ var mod_publisher = require('../lib/publisher');
 var mod_bunyan = require('bunyan');
 var mod_restify = require('restify');
 
-
+var resources = [
+    {
+        resource: 'vm',
+        subResources: ['nic', 'alias'],
+        bootstrapRoute: '/vms'
+    }
+];
 var server = mod_restify.createServer();
 var options = {
     log: mod_bunyan.createLogger({
@@ -23,16 +29,20 @@ var options = {
         level: process.env['LOG_LEVEL'] || 'info',
         stream: process.stderr
     }),
-    morayBucketName: 'z_change_bucket',
-    morayHost: '10.99.99.17',
-    morayResolvers: {
-        resolvers: ['10.99.99.11']
+    moray: {
+        bucketName: 'z_change_bucket',
+        host: '10.99.99.17',
+        resolvers: {
+            resolvers: ['10.99.99.11']
+        },
+        timeout: 200,
+        minTimeout: 1000,
+        maxTimeout: 2000,
+        port: 2020
     },
-    morayTimeout: 200,
-    morayMinTimeout: 1000,
-    morayMaxTimeout: 2000,
-    morayPort: 2020,
-    restifyServer: server
+    restifyServer: server,
+    resources: resources,
+    maxAge: 2
 };
 
 test('test publisher moray operations', function (t) {
@@ -43,7 +53,8 @@ test('test publisher moray operations', function (t) {
             subResources: ['nic']
         },
         changedResourceId: '78615996-1a0e-40ca-974e-8b484774711a',
-        published: 'no'
+        published: 'no',
+        maxAge: 28800
     };
     var publisher = new mod_publisher(options);
 

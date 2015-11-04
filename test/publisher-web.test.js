@@ -79,6 +79,7 @@ test('test publisher change feed stats with listeners', function (t) {
                 stream: process.stderr
             }),
             endpoint: '127.0.0.1',
+            port: 8080,
             instance: 'uuid goes here',
             service: 'tcns',
             changeKind: {
@@ -93,6 +94,7 @@ test('test publisher change feed stats with listeners', function (t) {
                 stream: process.stderr
             }),
             endpoint: '127.0.0.1',
+            port: 8080,
             instance: 'uuid goes here2',
             service: 'tcns2',
             changeKind: {
@@ -141,6 +143,7 @@ test('test publisher change feed stats after removal', function (t) {
                 stream: process.stderr
             }),
             endpoint: '127.0.0.1',
+            port: 8080,
             instance: 'uuid goes here',
             service: 'tcns',
             changeKind: {
@@ -155,6 +158,7 @@ test('test publisher change feed stats after removal', function (t) {
                 stream: process.stderr
             }),
             endpoint: '127.0.0.1',
+            port: 8080,
             instance: 'uuid goes here2',
             service: 'tcns2',
             changeKind: {

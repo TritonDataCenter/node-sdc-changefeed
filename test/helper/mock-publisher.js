@@ -33,17 +33,20 @@ var options = {
         level: process.env['LOG_LEVEL'] || 'trace',
         stream: process.stderr
     }),
-    morayBucketName: 'pub_change_bucket',
-    morayHost: '10.99.99.17',
-    morayResolvers: {
-        resolvers: ['10.99.99.11']
+    moray: {
+        bucketName: 'pub_change_bucket',
+        host: '10.99.99.17',
+        resolvers: {
+            resolvers: ['10.99.99.11']
+        },
+        timeout: 200,
+        minTimeout: 1000,
+        maxTimeout: 2000,
+        port: 2020
     },
-    morayTimeout: 200,
-    morayMinTimeout: 1000,
-    morayMaxTimeout: 2000,
-    morayPort: 2020,
     restifyServer: server,
-    resources: resources
+    resources: resources,
+    maxAge: 2
 };
 
 var publisher = new Publisher(options);
@@ -79,7 +82,7 @@ publisher.on('moray-ready', function () {
     if (process.argv[4] === 'bonus') {
         setInterval(function () {
             console.log('Publishing bonus round!');
-            for (var i = 0; i < changes; i++) {
+            for (var p = 0; p < changes; p++) {
                 testChange.changedResourceId = mod_libuuid.create();
                 publisher.publish(testChange, publishHandler);
             }

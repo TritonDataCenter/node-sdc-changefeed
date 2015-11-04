@@ -20,6 +20,10 @@
   "optionalDependencies": {
     "dtrace-provider": "0.6.0"
   },
+  "directories": {
+    "bin": "./bin",
+    "lib": "./lib"
+  },
   "scripts": {
     "start": "node ./server.js",
     "test": "./node_modules/.bin/tape test/*.test.js"

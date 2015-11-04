@@ -48,17 +48,20 @@ apisections:
 ```
 {
     log: bunynan_instance,
-    morayBucketName: 'name_of_feed_bucket',
-    morayHost: '10.99.99.17',
-    morayResolvers: {
-        resolvers: ['10.99.99.11']
+    moray: {
+        bucketName: 'name_of_feed_bucket',
+        host: '10.99.99.17',
+        resolvers: {
+            resolvers: ['10.99.99.11']
+        },
+        timeout: 200,
+        minTimeout: 1000,
+        maxTimeout: 2000,
+        port: 2020
     },
-    morayTimeout: 200,
-    morayMinTimeout: 1000,
-    morayMaxTimeout: 2000,
-    morayPort: 2020,
     restifyServer: restify_instance,
-    resources: resource_array
+    resources: resource_array,
+    maxAge: 28800
 }
 ```
 
@@ -68,6 +71,7 @@ apisections:
 {
     log: bunynan_instance,
     endpoint: '127.0.0.1',
+    port: 8080,
     instance: 'uuid_of_listener_service',
     service: 'listener_service_name',
     changeKind: changeKind
