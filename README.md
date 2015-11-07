@@ -39,6 +39,12 @@ Simple tests (requires a running CoaL) can be run using:
 $ make test
 ```
 
+## CLI
+
+```
+$ changefeedsnoop -h 127.0.0.1 -p 8080 -r vm -s nic,alias
+```
+
 ## Setup
 
 Publisher

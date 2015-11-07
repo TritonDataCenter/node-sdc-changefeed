@@ -86,6 +86,11 @@ function main() {
         var changeItem = listener.read();
         console.log('%j', changeItem);
     });
+
+    listener.on('connection-end', function () {
+        console.log('connection ended');
+        process.exit(0);
+    });
 }
 
 function parseOptions() {
