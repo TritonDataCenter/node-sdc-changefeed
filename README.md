@@ -42,7 +42,7 @@ $ make test
 ## CLI
 
 ```
-$ changefeedsnoop -h 127.0.0.1 -p 8080 -r vm -s nic,alias
+$ changefeedsnoop -h 127.0.0.1 -p 8080 -r vm -s nic,alias | bunyan --color
 ```
 
 ## Setup

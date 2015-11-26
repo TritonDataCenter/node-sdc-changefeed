@@ -15,14 +15,13 @@ var mod_changefeed = require('../lib');
 var mod_getopt = require('posix-getopt');
 var mod_libuuid = require('libuuid');
 
-
-var uuid = mod_libuuid.create();
+var log = mod_bunyan.createLogger({
+    name: 'changefeedsnoop',
+    level: process.env['LOG_LEVEL'] || 'info',
+    stream: process.stdout
+});
 var opts = {
-    log: mod_bunyan.createLogger({
-        name: 'changefeedsnoop',
-        level: process.env['LOG_LEVEL'] || 'error',
-        stream: process.stderr
-    }),
+    log: log,
     endpoint: '127.0.0.1',
     port: 80,
     instance: uuid,
@@ -31,7 +30,8 @@ var opts = {
         resource: undefined,
         subResources: undefined
     }
-}
+};
+var uuid = mod_libuuid.create();
 
 var message = [
     'use: changefeedsnoop [-h host] [-p port] [-r resource] [-s sub1,sub2,...]',
@@ -79,16 +79,16 @@ function main() {
     listener.register();
 
     listener.on('bootstrap', function () {
-        console.log('bootstrap received');
+        log.info('bootstrap received');
     });
 
     listener.on('readable', function () {
         var changeItem = listener.read();
-        console.log('%j', changeItem);
+        log.info({changeItem: changeItem}, 'changeItem');
     });
 
     listener.on('connection-end', function () {
-        console.log('connection ended');
+        log.info('connection ended');
         process.exit(0);
     });
 }
