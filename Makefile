@@ -25,33 +25,21 @@
 #
 # Tools
 #
+NPM := npm
 TAPE		:= ./node_modules/.bin/tape
 
 #
 # Files
 #
 DOC_FILES	 = index.md
-JS_FILES	:= $(shell ls *.js) $(shell find lib test -name '*.js')
+JS_FILES	:= $(shell find lib test -name '*.js')
 JSON_FILES	 = package.json
 JSL_CONF_NODE	 = tools/jsl.node.conf
 JSL_FILES_NODE	 = $(JS_FILES)
 JSSTYLE_FILES	 = $(JS_FILES)
 JSSTYLE_FLAGS	 = -f tools/jsstyle.conf
-REPO_MODULES	 = src/node-dummy
-
-NODE_PREBUILT_VERSION=v0.10.40
-
-ifeq ($(shell uname -s),SunOS)
-	NODE_PREBUILT_CC_VERSION=4.6.2
-	NODE_PREBUILT_TAG=zone
-endif
 
 include ./tools/mk/Makefile.defs
-ifeq ($(shell uname -s),SunOS)
-	include ./tools/mk/Makefile.node_prebuilt.defs
-else
-	include ./tools/mk/Makefile.node.defs
-endif
 
 #
 # Repo-specific targets
@@ -70,9 +58,4 @@ test: $(TAPE)
 	TAPE=1 $(TAPE) test/*.test.js
 
 include ./tools/mk/Makefile.deps
-ifeq ($(shell uname -s),SunOS)
-	include ./tools/mk/Makefile.node_prebuilt.targ
-else
-	include ./tools/mk/Makefile.node.targ
-endif
 include ./tools/mk/Makefile.targ
