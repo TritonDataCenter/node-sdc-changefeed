@@ -1,22 +1,26 @@
 {
   "name": "changefeed",
   "description": "Change Feed Modules",
-  "version": "1.0.5",
+  "version": "1.1.0",
   "author": "Joyent (joyent.com)",
   "private": false,
   "main": "./lib/index.js",
   "dependencies": {
+    "assert-plus": "0.2.0",
+    "backoff": "2.4.1",
     "bunyan": "1.5.1",
     "libuuid": "0.1.4",
     "moray": "git+ssh://git@github.com:joyent/node-moray.git#b84ef0e0b",
     "posix-getopt": "1.2.0",
-    "restify": "4.0.3",
+    "restify-clients": "1.1.1",
+    "sprintf-js": "1.0.3",
     "vasync": "1.6.3",
     "vstream": "0.1.0",
     "watershed": "0.3.1"
   },
   "devDependencies": {
-    "tape": "4.2.2"
+    "tape": "4.2.2",
+    "restify": "4.0.3"
   },
   "optionalDependencies": {
     "dtrace-provider": "0.6.0"

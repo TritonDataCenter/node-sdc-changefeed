@@ -24,14 +24,13 @@ var opts = {
     log: log,
     endpoint: '127.0.0.1',
     port: 80,
-    instance: uuid,
+    instance: mod_libuuid.create(),
     service: 'changefeedsnoop',
     changeKind: {
         resource: undefined,
         subResources: undefined
     }
 };
-var uuid = mod_libuuid.create();
 
 var message = [
     'use: changefeedsnoop [-h host] [-p port] [-r resource] [-s sub1,sub2,...]',

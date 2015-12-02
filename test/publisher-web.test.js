@@ -58,8 +58,10 @@ test('test publisher change feed stats with no listeners', function (t) {
     client.get('/changefeeds/stats', function (err, req, res, obj) {
         t.equal(obj.listeners, 0, 'listener count 0');
         t.equal(Object.keys(obj.registrations).length, 0, 'registrations');
-        server.kill('SIGHUP');
-        t.end();
+        process.nextTick(function () {
+            server.kill('SIGHUP');
+            t.end();
+        });
     });
 });
 
@@ -179,10 +181,10 @@ test('test publisher change feed stats after removal', function (t) {
                     var regCount = Object.keys(obj.registrations).length;
                     t.equal(obj.listeners, 2, 'listener count 2');
                     t.equal(regCount, 2, 'length 2');
-                    listener._endSocket();
-                    process.nextTick(function () {
+                    setTimeout(function () {
+                        listener._endSocket();
                         listener2._endSocket();
-                    });
+                    }, 1000);
                 });
             });
         });
@@ -200,7 +202,9 @@ test('test publisher change feed stats after removal', function (t) {
                 var regCount = Object.keys(obj.registrations).length;
                 t.equal(obj.listeners, 0, 'listener count 0');
                 t.equal(regCount, 0, 'length 0');
-                publisher.kill('SIGHUP');
+                setTimeout(function () {
+                    publisher.kill('SIGHUP');
+                }, 1000);
             });
         });
     });

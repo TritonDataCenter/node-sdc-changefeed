@@ -45,9 +45,17 @@ apisections:
 
 ## Publisher options
 
+* The backoff object is optional and defaults will be set if not provided.
+
 ```
 {
+    backoff: {
+        maxTimeout: Infinity,
+        minTimeout: 10,
+        retries: Infinity
+    },
     log: bunynan_instance,
+    maxAge: 28800,
     moray: {
         bucketName: 'name_of_feed_bucket',
         host: '10.99.99.17',
@@ -60,18 +68,23 @@ apisections:
         port: 2020
     },
     restifyServer: restify_instance,
-    resources: resource_array,
-    maxAge: 28800
+    resources: resource_array
 }
 ```
 
 ## Listener options
 
+* The backoff object is optional and defaults will be set if not provided.
+
 ```
 {
+    backoff: {
+        maxTimeout: Infinity,
+        minTimeout: 10,
+        retries: Infinity
+    },
     log: bunynan_instance,
-    endpoint: '127.0.0.1',
-    port: 8080,
+    url: 'http://localhost',
     instance: 'uuid_of_listener_service',
     service: 'listener_service_name',
     changeKind: changeKind
@@ -104,6 +117,11 @@ apisections:
  * Emitted when the publisher module has connected to the supplied moray
    instance.
 
+## moray-fail
+
+ * Emitted when the publisher module hits max backoff retries without
+   successfully creating a changefeed bucket.
+
 ## moray-ready
 
  * Emitted when the publisher has ensured the change feed bucket exists.
@@ -129,7 +147,8 @@ apisections:
 
 ## Error
 
- * Emitted when the listener detects an out of state object from the publisher.
+ * Emitted when the listener detects an out of state object from the publisher,
+   or when the listener fails to connect to the publisher.
 
 # Publisher added HTTP routes
 

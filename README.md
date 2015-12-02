@@ -55,11 +55,17 @@ var mod_changefeed = require('changefeed');
 var mod_restify = require('restify');
 
 var options = {
+    backoff: {
+        maxTimeout: Infinity,
+        minTimeout: 10,
+        retries: Infinity
+    },
     log: mod_bunyan.createLogger({
         name: 'publisher_test',
         level: process.env['LOG_LEVEL'] || 'trace',
         stream: process.stderr
     }),
+    maxAge: 2000,
     moray: {
         bucketName: 'pub_change_bucket',
         host: '10.99.99.17',
@@ -72,8 +78,7 @@ var options = {
         port: 2020
     }
     restifyServer: server,
-    resources: resources,
-    maxAge: 2000
+    resources: resources
 };
 
 var publisher = mod_changefeed.createPublisher(options);
@@ -86,12 +91,17 @@ var mod_bunyan = require('bunyan');
 var mod_changefeed = require('changefeed');
 
 var options = {
+    backoff: {
+        maxTimeout: Infinity,
+        minTimeout: 10,
+        retries: Infinity
+    },
     log: mod_bunyan.createLogger({
         name: 'listener_test',
         level: process.env['LOG_LEVEL'] || 'error',
         stream: process.stderr
     }),
-    endpoint: '127.0.0.1',
+    url: 'http://localhost',
     instance: 'uuid goes here',
     service: 'tcns',
     changeKind: {
