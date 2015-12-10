@@ -17,7 +17,7 @@ var mod_libuuid = require('libuuid');
 
 var log = mod_bunyan.createLogger({
     name: 'changefeedsnoop',
-    level: process.env['LOG_LEVEL'] || 'info',
+    level: process.env['LOG_LEVEL'] || 'trace',
     stream: process.stdout
 });
 var opts = {
@@ -29,6 +29,11 @@ var opts = {
     changeKind: {
         resource: undefined,
         subResources: undefined
+    },
+    backoff: {
+        minTimeout: 1000,
+        maxTimeout: Infinity,
+        retries: Infinity
     }
 };
 
@@ -88,7 +93,6 @@ function main() {
 
     listener.on('connection-end', function () {
         log.info('connection ended');
-        process.exit(0);
     });
 }
 
