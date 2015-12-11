@@ -94,6 +94,11 @@ function main() {
     listener.on('connection-end', function () {
         log.info('connection ended');
     });
+
+    listener.on('error', function () {
+        log.error('changefeedsnoop encountered an error');
+        process.exit(1);
+    })
 }
 
 function parseOptions() {
