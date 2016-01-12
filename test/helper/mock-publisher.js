@@ -68,27 +68,28 @@ publisher.on('moray-ready', function () {
         changedResourceId: ''
     };
 
-    var changes = process.argv[2];
-    var changes2 = process.argv[3];
-    for (var i = 0; i < changes; i++) {
-        testChange.changedResourceId = mod_libuuid.create();
-        publisher.publish(testChange, publishHandler);
-    }
-    for (var j = 0; j < changes2; j++) {
-        testChange2.changedResourceId = mod_libuuid.create();
-        publisher.publish(testChange2, publishHandler);
-    }
+    publisher.once('registration', function () {
+        var changes = process.argv[2];
+        var changes2 = process.argv[3];
+        for (var i = 0; i < changes; i++) {
+            testChange.changedResourceId = mod_libuuid.create();
+            publisher.publish(testChange, publishHandler);
+        }
+        for (var j = 0; j < changes2; j++) {
+            testChange2.changedResourceId = mod_libuuid.create();
+            publisher.publish(testChange2, publishHandler);
+        }
 
-    if (process.argv[4] === 'bonus') {
-        setInterval(function () {
-            console.log('Publishing bonus round!');
-            for (var p = 0; p < changes; p++) {
-                testChange.changedResourceId = mod_libuuid.create();
-                publisher.publish(testChange, publishHandler);
-            }
-        }, 2000);
-    }
-
+        if (process.argv[4] === 'bonus') {
+            setInterval(function () {
+                console.log('Publishing bonus round!');
+                for (var p = 0; p < changes; p++) {
+                    testChange.changedResourceId = mod_libuuid.create();
+                    publisher.publish(testChange, publishHandler);
+                }
+            }, 2000);
+        }
+    });
 
     publisher.start();
     publisher.on('item-published', function () {
