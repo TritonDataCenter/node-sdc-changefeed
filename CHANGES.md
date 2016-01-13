@@ -11,3 +11,6 @@
    continue to work, but they will go away in a future version.
  * A `backoff` object has been added as an optional part of the `options`
    object. This lets the publisher and listener handle unavailability at init.
+
+### 1.1.7
+ * The publisher now emits a `registration` event when listeners register.
