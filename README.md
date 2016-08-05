@@ -5,13 +5,18 @@
 -->
 
 <!--
-    Copyright (c) 2015, Joyent, Inc.
+    Copyright (c) 2016, Joyent, Inc.
 -->
 
 # node-sdc-changefeed
 
-Provides support for publishing and listening to change feeds in SmartDataCenter
-/ Triton via Node.js libraries and a CLI.
+This repository is part of the Joyent Triton project. See the [contribution
+guidelines](https://github.com/joyent/triton/blob/master/CONTRIBUTING.md) --
+*Triton does not use GitHub PRs* -- and general documentation at the main
+[Triton project](https://github.com/joyent/triton) page.
+
+SDC Changefeed provides support for publishing and listening to change
+feeds in Triton via Node.js libraries and a CLI.
 
 
 ## Installation
