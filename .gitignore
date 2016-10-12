@@ -9,3 +9,4 @@ cscope.out
 smf/manifests/bapi.xml
 /npm-debug.log
 /changefeed-*.tgz
+*.swp

@@ -14,3 +14,11 @@
 
 ### 1.1.7
  * The publisher now emits a `registration` event when listeners register.
+
+### 1.2.0
+ * Listener properly emits `bootstrap` after successful backoff.
+ * Listener returns error objects when `error` is emitted.
+ * Listener changefeed item recieved logs are now trace instead of debug.
+ * Listener emits `connection-reset` instead of `connection-end` when a 
+   watershed `connectionReset` event is handled. `connection-end` is still
+   emitted when watershed emits `connectionReset`.

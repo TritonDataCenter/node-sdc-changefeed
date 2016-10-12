@@ -12,110 +12,168 @@
 
 
 var test = require('tape');
+var mod_assert = require('assert-plus');
 var mod_bunyan = require('bunyan');
 var mod_listener = require('../lib/listener');
 var mod_spawn = require('child_process').spawn;
 
-var options = {
-    log: mod_bunyan.createLogger({
-        name: 'listener_test',
-        level: process.env['LOG_LEVEL'] || 'error',
-        stream: process.stderr
-    }),
-    endpoint: '127.0.0.1',
-    port: 8080,
-    instance: 'uuid goes here',
-    service: 'tcns',
-    changeKind: {
-        resource: 'vm',
-        subResources: ['nic', 'alias']
-    }
-};
-var options2 = {
-    log: mod_bunyan.createLogger({
-        name: 'listener_test2',
-        level: process.env['LOG_LEVEL'] || 'error',
-        stream: process.stderr
-    }),
-    endpoint: '127.0.0.1',
-    port: 8080,
-    instance: 'uuid goes here2',
-    service: 'tcns2',
-    changeKind: {
-        resource: 'vm',
-        subResources: ['nic']
-    }
-};
-
-var serverKilled = false;
+var publisher_path = './test/helper/mock-publisher.js';
 
 test('test listener creation', function (t) {
-    t.plan(33);
-    var server = mod_spawn('./test/helper/mock-publisher.js', ['10', '5']);
-    var itemsProcessed = 0;
-    var itemsProcessed2 = 0;
-    var listener = new mod_listener(options);
-    var listener2 = new mod_listener(options2);
+    t.plan(34);
+    var primaryListenerOpts = {
+        log: mod_bunyan.createLogger({
+            name: 'listener_test',
+            level: process.env['LOG_LEVEL'] || 'error',
+            stream: process.stderr
+        }),
+        endpoint: '127.0.0.1',
+        port: 8080,
+        instance: 'uuid goes here',
+        service: 'tcns',
+        changeKind: {
+            resource: 'vm',
+            subResources: ['nic', 'alias']
+        }
+    };
 
-    t.equal(typeof (listener), 'object', 'listener is object');
-    t.equal(typeof (listener2), 'object', 'listener2 is object');
+    var secondaryListenerOpts = {
+        log: mod_bunyan.createLogger({
+            name: 'listener_test2',
+            level: process.env['LOG_LEVEL'] || 'error',
+            stream: process.stderr
+        }),
+        endpoint: '127.0.0.1',
+        port: 8080,
+        instance: 'uuid goes here2',
+        service: 'tcns2',
+        changeKind: {
+            resource: 'vm',
+            subResources: ['nic']
+        }
+    };
 
-    listener.register();
-    listener2.register();
+    var server = mod_spawn(publisher_path, ['10', '5']);
+    var primaryItemsProcessed = 0;
+    var secondaryItemsProcessed = 0;
+    var primaryListener = new mod_listener(primaryListenerOpts);
+    var secondaryListener = new mod_listener(secondaryListenerOpts);
 
-    listener.on('bootstrap', function () {
-        // console.log('bootstrap');
-        t.ok(true, 'listener bootstrap called');
+    mod_assert.object(primaryListener, 'primaryListener');
+    mod_assert.object(secondaryListener, 'secondaryListener');
+
+    primaryListener.register();
+    secondaryListener.register();
+
+    primaryListener.on('bootstrap', function () {
+        t.ok(true, 'primaryListener bootstrap called');
     });
-    listener2.on('bootstrap', function () {
-        // console.log('bootstrap2');
-        t.ok(true, 'listener2 bootstrap called');
+    secondaryListener.on('bootstrap', function () {
+        t.ok(true, 'secondaryListener bootstrap called');
     });
 
-    listener.on('readable', function () {
-        var changeItem = listener.read();
-        t.equal(typeof (changeItem), 'object', 'changeItem is object');
-        itemsProcessed++;
-        // var processedItem1 = changeItem.changeKind;
-        // console.log('listener resource:%j subResources:%j',
-        //     processedItem1.resource,
-        //     processedItem1.subResources);
-        if (itemsProcessed === 14) {
-            t.equal(itemsProcessed, 14, 'listener 15 changes');
+    primaryListener.on('readable', function () {
+        var changeItem = primaryListener.read();
+        t.equal(typeof (changeItem), 'object', 'primary change is object');
+        primaryItemsProcessed++;
+        if (primaryItemsProcessed === 15) {
+            t.equal(primaryItemsProcessed, 15, 'primary handled 15');
         }
     });
-    listener2.on('readable', function () {
-        var changeItem = listener2.read();
-        t.equal(typeof (changeItem), 'object', 'changeItem is object');
-        itemsProcessed2++;
-        // var processedItem2 = changeItem.changeKind;
-        // console.log('listener2 resource:%j subResources:%j',
-        //     processedItem2.resource,
-        //     processedItem2.subResources);
-        if (itemsProcessed2 === 9) {
-            t.equal(itemsProcessed2, 9, 'listener2 10 changes');
+
+    primaryListener.on('connection-end', function () {
+        t.ok(true, 'got connection-end');
+    });
+
+    secondaryListener.on('readable', function () {
+        var changeItem = secondaryListener.read();
+        t.equal(typeof (changeItem), 'object', 'secondary change is object');
+        secondaryItemsProcessed++;
+        if (secondaryItemsProcessed === 10) {
+            t.equal(secondaryItemsProcessed, 10, 'secondary handled 10');
         }
     });
-    t.ok(listener, 'listener is truthy');
-    t.ok(listener2, 'listener2 is truthy');
-
-    server.stderr.on('data', function (data) {
-        // console.log('STDOUT: %s', data.toString());
-    });
+    t.ok(primaryListener, 'primaryListener is truthy');
+    t.ok(secondaryListener, 'secondaryListener is truthy');
 
     server.stdout.on('data', function (data) {
         // Detect that the publisher has no items to publish and quit
         if (data.toString().indexOf('no-items') > -1) {
-            // console.log('STDOUT: %s', data.toString());
-            setTimeout(function () {
-                server.kill('SIGHUP');
-            }, 2000);
+            server.kill('SIGHUP');
         }
-        // console.log('STDOUT: ' + data.toString());
     });
 
-    server.on('close', function (code) {
-        // console.log('child process exited with code ' + code);
+    server.stderr.once('data', function (data) {
+        t.ok(data.toString().indexOf('publisher_test') > -1, 'stderr');
+    });
+
+    server.on('exit', function () {
+        t.ok(true, 'server exited');
         t.end();
     });
+
+});
+
+test('test listener backoff', function (t) {
+    t.plan(6);
+    var listenerOpts = {
+        log: mod_bunyan.createLogger({
+            name: 'listener_test',
+            level: process.env['LOG_LEVEL'] || 'error',
+            stream: process.stderr
+        }),
+        endpoint: '127.0.0.1',
+        port: 8080,
+        instance: 'uuid goes here',
+        service: 'tcns',
+        changeKind: {
+            resource: 'vm',
+            subResources: ['nic', 'alias']
+        },
+        backoff: {
+            maxTimeout: 10000,
+            minTimeout: 2000,
+            retries: 2
+        }
+    };
+
+    var bootstrap_count = 0;
+    var failServer = mod_spawn(publisher_path, ['0', '0']);
+    var fallbackServer;
+    var listener = new mod_listener(listenerOpts);
+
+    mod_assert.object(listener, 'listener');
+
+    listener.on('bootstrap', function () {
+        t.ok(true, 'listener bootstrap called');
+        bootstrap_count++;
+
+        if (bootstrap_count === 1) {
+            failServer.kill('SIGHUP');
+        }
+    });
+
+    listener.on('connection-end', function () {
+        if (bootstrap_count === 1) {
+            t.ok(true, 'got connection-end');
+            fallbackServer = mod_spawn(publisher_path, ['1', '0']);
+        }
+    });
+
+    listener.on('readable', function () {
+        var change = listener.read();
+        mod_assert.object(change, 'change');
+        t.ok(true, 'readable');
+        fallbackServer.kill('SIGHUP');
+    });
+
+
+    listener.on('error', function (error) {
+        var backoffError = new Error('Backoff failed');
+        t.deepEqual(error, backoffError, 'Backoff error');
+        t.ok(true, 'Got error after backoff retries maxed out');
+        t.end();
+    });
+
+    listener.register();
 });
