@@ -25,3 +25,7 @@
 
 ## 1.2.1
  * Support up to node version 4.
+
+## 1.2.2
+ * Upgrade to watershed v0.3.3 which fixes a write-after-end issue in the
+   publisher.
