@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (c) 2015, Joyent, Inc.
+ * Copyright (c) 2017, Joyent, Inc.
  */
 
 /* Test the listener components */
@@ -53,7 +53,7 @@ test('test listener creation', function (t) {
         }
     };
 
-    var server = mod_spawn(publisher_path, ['10', '5']);
+    var server = mod_spawn(process.execPath, [publisher_path, '10', '5']);
     var primaryItemsProcessed = 0;
     var secondaryItemsProcessed = 0;
     var primaryListener = new mod_listener(primaryListenerOpts);
@@ -138,7 +138,7 @@ test('test listener backoff', function (t) {
     };
 
     var bootstrap_count = 0;
-    var failServer = mod_spawn(publisher_path, ['0', '0']);
+    var failServer = mod_spawn(process.execPath, [publisher_path, '0', '0']);
     var fallbackServer;
     var listener = new mod_listener(listenerOpts);
 
@@ -156,7 +156,8 @@ test('test listener backoff', function (t) {
     listener.on('connection-end', function () {
         if (bootstrap_count === 1) {
             t.ok(true, 'got connection-end');
-            fallbackServer = mod_spawn(publisher_path, ['1', '0']);
+            fallbackServer = mod_spawn(process.execPath,
+                [publisher_path, '1', '0']);
         }
     });
 

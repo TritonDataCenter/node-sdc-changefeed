@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (c) 2015, Joyent, Inc.
+ * Copyright (c) 2017, Joyent, Inc.
  */
 
 /* Test the publisher components */
@@ -21,7 +21,8 @@ var mod_util = require('util');
 
 test('test publisher change feed list', function (t) {
     t.plan(6);
-    var server = spawn('./test/helper/mock-publisher.js', ['0', '0']);
+    var server = spawn(process.execPath,
+        ['./test/helper/mock-publisher.js', '0', '0']);
     var client = mod_restify.createJsonClient({
         url: 'http://localhost:8080'
     });
@@ -50,7 +51,8 @@ test('test publisher change feed list', function (t) {
 
 test('test publisher change feed stats with no listeners', function (t) {
     t.plan(2);
-    var server = spawn('./test/helper/mock-publisher.js', ['0', '0']);
+    var server = spawn(process.execPath,
+        ['./test/helper/mock-publisher.js', '0', '0']);
     var client = mod_restify.createJsonClient({
         url: 'http://localhost:8080'
     });
@@ -67,7 +69,8 @@ test('test publisher change feed stats with no listeners', function (t) {
 
 test('test publisher change feed stats with listeners', function (t) {
     t.plan(2);
-    var publisher = spawn('./test/helper/mock-publisher.js', ['0', '0']);
+    var publisher = spawn(process.execPath,
+        ['./test/helper/mock-publisher.js', '0', '0']);
     var client = mod_restify.createJsonClient({
         url: 'http://localhost:8080'
     });
@@ -131,7 +134,8 @@ test('test publisher change feed stats with listeners', function (t) {
 
 test('test publisher change feed stats after removal', function (t) {
     t.plan(6);
-    var publisher = spawn('./test/helper/mock-publisher.js', ['0', '0']);
+    var publisher = spawn(process.execPath,
+        ['./test/helper/mock-publisher.js', '0', '0']);
     var client = mod_restify.createJsonClient({
         url: 'http://localhost:8080'
     });
