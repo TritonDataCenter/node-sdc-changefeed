@@ -29,3 +29,10 @@
 ## 1.2.2
  * Upgrade to watershed v0.3.3 which fixes a write-after-end issue in the
    publisher.
+
+## 1.3.0
+ * Make `options.restifyServer` parameter optional for the `Publisher`
+   constructor.
+ * Add `Publisher.prototype.mountRestifyServerRoutes(restifyServer)` to the
+   `Publisher`'s API.
+ * Make `Listener.prototype.close` an alias for `Listener.prototype._endSocket`.

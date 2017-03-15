@@ -10,8 +10,77 @@ apisections:
 -->
 
 <!--
-    Copyright (c) 2015, Joyent, Inc.
+    Copyright (c) 2017, Joyent, Inc.
 -->
+
+Please see [Joyent Engineering
+Guidelines](https://github.com/joyent/eng/blob/master/docs/index.md) for a
+general set of guidelines that apply to all Joyent repositories.
+
+# API
+
+## Publisher
+
+### Constructor options
+
+* The `backoff` object is optional and defaults will be set if not provided.
+* The `restifyServer` is optional. If no `restifyServer` parameter is passed,
+  the publisher instance won't be reachable via HTTP using the routes documented
+  below, but will still record changes that need to be published. Users can
+  separately call the `mountRestifyServerRoutes` method to mount these routes at
+  any time.
+
+```
+{
+    backoff: {
+        maxTimeout: Infinity,
+        minTimeout: 10,
+        retries: Infinity
+    },
+    log: bunynan_instance,
+    maxAge: 28800,
+    moray: {
+        bucketName: 'name_of_feed_bucket',
+        host: '10.99.99.17',
+        resolvers: {
+            resolvers: ['10.99.99.11']
+        },
+        timeout: 200,
+        minTimeout: 1000,
+        maxTimeout: 2000,
+        port: 2020
+    },
+    restifyServer: restify_instance,
+    resources: resource_array
+}
+```
+
+### Public methods
+
+#### `mountRestifyServerRoutes(restifyServer)`
+
+Mounts [the routes documented below]()#publisher-added-http-routes) on the
+restify server instance `restifyServer`.
+
+## Listener
+
+### constructor options
+
+* The backoff object is optional and defaults will be set if not provided.
+
+```
+{
+    backoff: {
+        maxTimeout: Infinity,
+        minTimeout: 10,
+        retries: Infinity
+    },
+    log: bunynan_instance,
+    url: 'http://localhost',
+    instance: 'uuid_of_listener_service',
+    service: 'listener_service_name',
+    changeKind: changeKind
+}
 
 # Objects
 
@@ -43,52 +112,6 @@ apisections:
 }
 ```
 
-## Publisher options
-
-* The backoff object is optional and defaults will be set if not provided.
-
-```
-{
-    backoff: {
-        maxTimeout: Infinity,
-        minTimeout: 10,
-        retries: Infinity
-    },
-    log: bunynan_instance,
-    maxAge: 28800,
-    moray: {
-        bucketName: 'name_of_feed_bucket',
-        host: '10.99.99.17',
-        resolvers: {
-            resolvers: ['10.99.99.11']
-        },
-        timeout: 200,
-        minTimeout: 1000,
-        maxTimeout: 2000,
-        port: 2020
-    },
-    restifyServer: restify_instance,
-    resources: resource_array
-}
-```
-
-## Listener options
-
-* The backoff object is optional and defaults will be set if not provided.
-
-```
-{
-    backoff: {
-        maxTimeout: Infinity,
-        minTimeout: 10,
-        retries: Infinity
-    },
-    log: bunynan_instance,
-    url: 'http://localhost',
-    instance: 'uuid_of_listener_service',
-    service: 'listener_service_name',
-    changeKind: changeKind
-}
 ```
 
 ## Registration
@@ -175,10 +198,3 @@ listener registrations.
 | ---- | ------------------------------- | ----------------------------- |
 | 200  | OK                              | Stats object                  |
 | 500  | SERVER ERROR                    | Error object                  |
-
-
-
-
-
-Please see [Joyent Engineering Guidelines](https://github.com/joyent/eng/blob/master/docs/index.md)
-for a general set of guidelines that apply to all Joyent repositories.

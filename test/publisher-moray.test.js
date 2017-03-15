@@ -5,15 +5,17 @@
  */
 
 /*
- * Copyright (c) 2015, Joyent, Inc.
+ * Copyright (c) 2017, Joyent, Inc.
  */
 
 /* Test the publisher components */
 
-var test = require('tape');
-var mod_publisher = require('../lib/publisher');
+var mod_assert = require('assert-plus');
 var mod_bunyan = require('bunyan');
+var mod_jsprim = require('jsprim');
+var mod_publisher = require('../lib/publisher');
 var mod_restify = require('restify');
+var test = require('tape');
 
 var resources = [
     {
@@ -26,7 +28,7 @@ var server = mod_restify.createServer();
 var options = {
     log: mod_bunyan.createLogger({
         name: 'publisher_test',
-        level: process.env['LOG_LEVEL'] || 'info',
+        level: process.env['LOG_LEVEL'] || 'error',
         stream: process.stderr
     }),
     moray: {
@@ -45,7 +47,11 @@ var options = {
     maxAge: 2
 };
 
-test('test publisher moray operations', function (t) {
+function testPublisher(t, publisher, callback) {
+    mod_assert.object(t, 't');
+    mod_assert.object(publisher, 'publisher');
+    mod_assert.func(callback, 'callback');
+
     t.plan(4);
     var testChange = {
         changeKind: {
@@ -56,7 +62,6 @@ test('test publisher moray operations', function (t) {
         published: 'no',
         maxAge: 28800
     };
-    var publisher = new mod_publisher(options);
 
     t.ok(publisher, 'Publisher successfully created.');
 
@@ -74,5 +79,21 @@ test('test publisher moray operations', function (t) {
             t.ok(true, 'all items published');
             publisher.stop();
         });
+    });
+}
+
+test('test publisher moray operations', function (t) {
+    var publisher = new mod_publisher(options);
+    testPublisher(t, publisher, function onTestDone() {
+        t.end();
+    });
+});
+
+test('test publisher moray operations without restify server', function (t) {
+    var optionsNoRestifyServer = mod_jsprim.deepCopy(options);
+
+    var publisher = new mod_publisher(optionsNoRestifyServer);
+    testPublisher(t, publisher, function onTestDone() {
+        t.end();
     });
 });

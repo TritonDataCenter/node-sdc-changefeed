@@ -10,21 +10,28 @@
 
 /* Test the publisher components */
 
-var test = require('tape');
-var spawn = require('child_process').spawn;
-var mod_restify = require('restify');
-var Watershed = require('watershed').Watershed;
-var mod_http = require('http');
+var assert = require('assert-plus');
+var MockPublisher = require('./helper/mock-publisher');
 var mod_bunyan = require('bunyan');
+var mod_http = require('http');
 var mod_listener = require('../lib/listener');
 var mod_util = require('util');
+var mod_restify = require('restify');
+var spawn = require('child_process').spawn;
+var test = require('tape');
+var util = require('util');
+var Watershed = require('watershed').Watershed;
 
-test('test publisher change feed list', function (t) {
+function testChangefeedList(t, publisherAddressAndPort, callback) {
+    assert.object(t, 't');
+    assert.object(publisherAddressAndPort, 'publisherAddressAndPort');
+    assert.func(callback, 'callback');
+
     t.plan(6);
-    var server = spawn(process.execPath,
-        ['./test/helper/mock-publisher.js', '0', '0']);
+
     var client = mod_restify.createJsonClient({
-        url: 'http://localhost:8080'
+        url: util.format('http://%s:%d', publisherAddressAndPort.address,
+            publisherAddressAndPort.port)
     });
 
     client.get('/changefeeds', function (err, req, res, obj) {
@@ -44,177 +51,355 @@ test('test publisher change feed list', function (t) {
         t.equal(obj[0].subResources[0], subResources[0], 'subResources[0]');
         t.equal(obj[0].subResources[1], subResources[1], 'subResources[1]');
         t.equal(obj[0].bootstrapRoute, bootstrapRoute, 'bootstrap');
-        server.kill('SIGHUP');
-        t.end();
+
+        client.close();
+
+        callback();
+    });
+}
+
+function testChangefeedStats(t, publisherAddressAndPort, callback) {
+    assert.object(t, 't');
+    assert.object(publisherAddressAndPort, 'publisherAddressAndPort');
+    assert.func(callback, 'callback');
+
+    t.plan(3);
+    var client = mod_restify.createJsonClient({
+        url: util.format('http://%s:%d', publisherAddressAndPort.address,
+            publisherAddressAndPort.port)
+    });
+
+    client.get('/changefeeds/stats', function (err, req, res, obj) {
+        t.ifErr(err, 'getting changefeed stats should not error');
+        t.equal(obj.listeners, 0, 'listener count 0');
+        t.equal(Object.keys(obj.registrations).length, 0, 'registrations');
+
+        client.close();
+
+        process.nextTick(callback);
+    });
+}
+
+function testChangefeedStatsWithListener(t, mockPublisher,
+    publisherAddressAndPort, callback) {
+    assert.object(t, 't');
+    assert.object(mockPublisher, 'mockPublisher');
+    assert.object(publisherAddressAndPort, 'publisherAddressAndPort');
+    assert.func(callback, 'callback');
+
+    t.plan(3);
+
+    var client = mod_restify.createJsonClient({
+        url: util.format('http://%s:%d', publisherAddressAndPort.address,
+            publisherAddressAndPort.port)
+    });
+
+    var options = {
+        log: new mod_bunyan({
+            name: 'listener_test',
+            level: process.env['LOG_LEVEL'] || 'error',
+            stream: process.stderr
+        }),
+        endpoint: publisherAddressAndPort.address,
+        port: publisherAddressAndPort.port,
+        instance: 'uuid goes here',
+        service: 'tcns',
+        changeKind: {
+            resource: 'vm',
+            subResources: ['nic', 'alias']
+        }
+    };
+    var options2 = {
+        log: new mod_bunyan({
+            name: 'listener_test2',
+            level: process.env['LOG_LEVEL'] || 'error',
+            stream: process.stderr
+        }),
+        endpoint: publisherAddressAndPort.address,
+        port: publisherAddressAndPort.port,
+        instance: 'uuid goes here2',
+        service: 'tcns2',
+        changeKind: {
+            resource: 'vm',
+            subResources: ['nic']
+        }
+    };
+
+    var listener = new mod_listener(options);
+    var listener2 = new mod_listener(options2);
+
+    listener.register();
+    listener.on('bootstrap', function () {
+        listener2.register();
+        listener2.on('bootstrap', function () {
+            var statsPath = '/changefeeds/stats';
+            client.get(statsPath, function (err, req, res, obj) {
+                var regCount = Object.keys(obj.registrations).length;
+
+                client.close();
+
+                t.ifErr(err, 'getting changefeed stats should not error');
+                t.equal(obj.listeners, 2, 'listener count 2');
+                t.equal(regCount, 2, 'length 2');
+
+                listener.close();
+                listener2.close();
+
+                callback();
+            });
+        });
+    });
+}
+
+function testChangefeedStatsWithListenerAfterRemoval(t, mockPublisher,
+    publisherAddressAndPort, callback) {
+    assert.object(t, 't');
+    assert.object(mockPublisher, 'mockPublisher');
+    assert.object(publisherAddressAndPort, 'publisherAddressAndPort');
+    assert.func(callback, 'callback');
+
+    var client = mod_restify.createJsonClient({
+        url: util.format('http://%s:%d', publisherAddressAndPort.address,
+            publisherAddressAndPort.port)
+    });
+
+    t.plan(7);
+
+    var options = {
+        log: new mod_bunyan({
+            name: 'listener_test',
+            level: process.env['LOG_LEVEL'] || 'error',
+            stream: process.stderr
+        }),
+        endpoint: publisherAddressAndPort.address,
+        port: publisherAddressAndPort.port,
+        instance: 'uuid goes here',
+        service: 'tcns',
+        changeKind: {
+            resource: 'vm',
+            subResources: ['nic', 'alias']
+        }
+    };
+    var options2 = {
+        log: new mod_bunyan({
+            name: 'listener_test2',
+            level: process.env['LOG_LEVEL'] || 'error',
+            stream: process.stderr
+        }),
+        endpoint: publisherAddressAndPort.address,
+        port: publisherAddressAndPort.port,
+        instance: 'uuid goes here2',
+        service: 'tcns2',
+        changeKind: {
+            resource: 'vm',
+            subResources: ['nic']
+        }
+    };
+
+    var listener = new mod_listener(options);
+    var listener2 = new mod_listener(options2);
+    var statsPath = '/changefeeds/stats';
+
+    listener.register();
+    listener.on('bootstrap', function () {
+        listener2.register();
+        listener2.on('bootstrap', function () {
+            client.get(statsPath, function (err, req, res, obj) {
+                var regCount = Object.keys(obj.registrations).length;
+                t.ifErr(err, 'getting changefeed stats should not error');
+                t.equal(obj.listeners, 2, 'listener count 2');
+                t.equal(regCount, 2, 'length 2');
+
+                listener.close();
+            });
+        });
+    });
+
+    listener.on('connection-end', function () {
+        client.get(statsPath, function (err, req, res, obj) {
+            var regCount = Object.keys(obj.registrations).length;
+            t.equal(obj.listeners, 1, 'listener count 1');
+            t.equal(regCount, 1, 'length 1');
+
+            listener2.close();
+        });
+    });
+
+    listener2.on('connection-end', function () {
+        client.get(statsPath, function (err, req, res, obj) {
+            var regCount = Object.keys(obj.registrations).length;
+            t.equal(obj.listeners, 0, 'listener count 0');
+            t.equal(regCount, 0, 'length 0');
+
+            client.close();
+
+            callback();
+        });
+    });
+}
+
+function startMockPublisher(t, mockPublisherOpts, callback) {
+    assert.object(t, 't');
+    assert.object(mockPublisherOpts, 'mockPublisherOpts');
+    assert.func(callback, 'callback');
+
+    var mockPublisher = new MockPublisher(mockPublisherOpts);
+
+    mockPublisher.start(function onStart(startErr, publisherHttpSrvInfo) {
+        if (startErr) {
+            t.ifErr(startErr, 'mock publisher should start successfully');
+            t.end();
+        } else {
+            callback(mockPublisher, publisherHttpSrvInfo);
+        }
+    });
+}
+
+test('test publisher change feed list', function (t) {
+    startMockPublisher(t, {
+        nbPrimaryChangesToPublish: 0,
+        nbSecondaryChangesToPublish: 0
+    }, function onMockPublisherStarted(mockPublisher, serverAddressAndPort) {
+        testChangefeedList(t, serverAddressAndPort, function onTestDone() {
+            mockPublisher.on('close', function onServerExited() {
+                t.end();
+            });
+
+            mockPublisher.close();
+        });
+    });
+});
+
+test('test publisher change feed list when server routes mounted after ' +
+    'creation', function (t) {
+    startMockPublisher(t, {
+        nbPrimaryChangesToPublish: 0,
+        nbSecondaryChangesToPublish: 0,
+        nbMountSrvRoutesAfterCreate: 1
+    }, function onMockPublisherStarted(mockPublisher, serverAddressAndPort) {
+        testChangefeedList(t, serverAddressAndPort, function onTestDone() {
+            mockPublisher.on('close', function onServerExited() {
+                t.end();
+            });
+
+            mockPublisher.close();
+        });
+    });
+});
+
+test('test publisher change feed list when server routes mounted twice after ' +
+    'creation', function (t) {
+    startMockPublisher(t, {
+        nbPrimaryChangesToPublish: 0,
+        nbSecondaryChangesToPublish: 0,
+        nbMountSrvRoutesAfterCreate: 2
+    }, function onMockPublisherStarted(mockPublisher, serverAddressAndPort) {
+        testChangefeedList(t, serverAddressAndPort, function onTestDone() {
+            mockPublisher.on('close', function onServerExited() {
+                t.end();
+            });
+
+            mockPublisher.close();
+        });
     });
 });
 
 test('test publisher change feed stats with no listeners', function (t) {
-    t.plan(2);
-    var server = spawn(process.execPath,
-        ['./test/helper/mock-publisher.js', '0', '0']);
-    var client = mod_restify.createJsonClient({
-        url: 'http://localhost:8080'
-    });
+    startMockPublisher(t, {
+        nbPrimaryChangesToPublish: 0,
+        nbSecondaryChangesToPublish: 0
+    }, function onMockPublisherStarted(mockPublisher, serverAddressAndPort) {
+        testChangefeedStats(t, serverAddressAndPort, function onTestDone() {
+            mockPublisher.on('close', function onServerExited() {
+                t.end();
+            });
 
-    client.get('/changefeeds/stats', function (err, req, res, obj) {
-        t.equal(obj.listeners, 0, 'listener count 0');
-        t.equal(Object.keys(obj.registrations).length, 0, 'registrations');
-        process.nextTick(function () {
-            server.kill('SIGHUP');
-            t.end();
+            mockPublisher.close();
+        });
+    });
+});
+
+test('test publisher change feed stats with no listeners and srv routes ' +
+    'mounted after creation', function (t) {
+    startMockPublisher(t, {
+        nbPrimaryChangesToPublish: 0,
+        nbSecondaryChangesToPublish: 0,
+        nbMountSrvRoutesAfterCreate: 1
+    }, function onMockPublisherStarted(mockPublisher, serverAddressAndPort) {
+        testChangefeedStats(t, serverAddressAndPort, function onTestDone() {
+            mockPublisher.on('close', function onServerExited() {
+                t.end();
+            });
+
+            mockPublisher.close();
         });
     });
 });
 
 test('test publisher change feed stats with listeners', function (t) {
-    t.plan(2);
-    var publisher = spawn(process.execPath,
-        ['./test/helper/mock-publisher.js', '0', '0']);
-    var client = mod_restify.createJsonClient({
-        url: 'http://localhost:8080'
-    });
-
-    publisher.stderr.once('data', function (data) {
-        console.log('publisher ready...');
-        var options = {
-            log: new mod_bunyan({
-                name: 'listener_test',
-                level: process.env['LOG_LEVEL'] || 'trace',
-                stream: process.stderr
-            }),
-            endpoint: '127.0.0.1',
-            port: 8080,
-            instance: 'uuid goes here',
-            service: 'tcns',
-            changeKind: {
-                resource: 'vm',
-                subResources: ['nic', 'alias']
-            }
-        };
-        var options2 = {
-            log: new mod_bunyan({
-                name: 'listener_test2',
-                level: process.env['LOG_LEVEL'] || 'info',
-                stream: process.stderr
-            }),
-            endpoint: '127.0.0.1',
-            port: 8080,
-            instance: 'uuid goes here2',
-            service: 'tcns2',
-            changeKind: {
-                resource: 'vm',
-                subResources: ['nic']
-            }
-        };
-
-        var listener = new mod_listener(options);
-        var listener2 = new mod_listener(options2);
-
-        listener.register();
-        listener.on('bootstrap', function () {
-            listener2.register();
-            listener2.on('bootstrap', function () {
-                var statsPath = '/changefeeds/stats';
-                client.get(statsPath, function (err, req, res, obj) {
-                    var regCount = Object.keys(obj.registrations).length;
-                    t.equal(obj.listeners, 2, 'listener count 2');
-                    t.equal(regCount, 2, 'length 2');
-                    publisher.kill('SIGHUP');
-                });
+    startMockPublisher(t, {
+        nbPrimaryChangesToPublish: 0,
+        nbSecondaryChangesToPublish: 0
+    }, function onMockPublisherStarted(mockPublisher, publisherAddressAndPort) {
+        testChangefeedStatsWithListener(t, mockPublisher,
+            publisherAddressAndPort, function onTestDone() {
+            mockPublisher.on('close', function onPublisherExited() {
+                t.end();
             });
+
+            mockPublisher.close();
         });
     });
+});
 
-    publisher.on('close', function (code) {
-        // console.log('child process exited with code ' + code);
-        t.end();
+test('test publisher change feed stats with listeners and srv routes mounted ' +
+    'after creation', function (t) {
+    startMockPublisher(t, {
+        nbPrimaryChangesToPublish: 0,
+        nbSecondaryChangesToPublish: 0,
+        nbMountSrvRoutesAfterCreate: 1
+    }, function onMockPublisherStarted(mockPublisher, publisherAddressAndPort) {
+        testChangefeedStatsWithListener(t, mockPublisher,
+            publisherAddressAndPort, function onTestDone() {
+                mockPublisher.on('close', function onPublisherExited() {
+                    t.end();
+                });
+
+                mockPublisher.close();
+            });
     });
 });
 
 test('test publisher change feed stats after removal', function (t) {
-    t.plan(6);
-    var publisher = spawn(process.execPath,
-        ['./test/helper/mock-publisher.js', '0', '0']);
-    var client = mod_restify.createJsonClient({
-        url: 'http://localhost:8080'
-    });
-
-    publisher.stderr.once('data', function (data) {
-        console.log('publisher ready...');
-        var options = {
-            log: new mod_bunyan({
-                name: 'listener_test',
-                level: process.env['LOG_LEVEL'] || 'trace',
-                stream: process.stderr
-            }),
-            endpoint: '127.0.0.1',
-            port: 8080,
-            instance: 'uuid goes here',
-            service: 'tcns',
-            changeKind: {
-                resource: 'vm',
-                subResources: ['nic', 'alias']
-            }
-        };
-        var options2 = {
-            log: new mod_bunyan({
-                name: 'listener_test2',
-                level: process.env['LOG_LEVEL'] || 'info',
-                stream: process.stderr
-            }),
-            endpoint: '127.0.0.1',
-            port: 8080,
-            instance: 'uuid goes here2',
-            service: 'tcns2',
-            changeKind: {
-                resource: 'vm',
-                subResources: ['nic']
-            }
-        };
-
-        var listener = new mod_listener(options);
-        var listener2 = new mod_listener(options2);
-        var statsPath = '/changefeeds/stats';
-
-        listener.register();
-        listener.on('bootstrap', function () {
-            listener2.register();
-            listener2.on('bootstrap', function () {
-                client.get(statsPath, function (err, req, res, obj) {
-                    var regCount = Object.keys(obj.registrations).length;
-                    t.equal(obj.listeners, 2, 'listener count 2');
-                    t.equal(regCount, 2, 'length 2');
-                    setTimeout(function () {
-                        listener._endSocket();
-                        listener2._endSocket();
-                    }, 1000);
+    startMockPublisher(t, {
+        nbPrimaryChangesToPublish: 0,
+        nbSecondaryChangesToPublish: 0
+    }, function onMockPublisherStarted(mockPublisher, publisherAddressAndPort) {
+        testChangefeedStatsWithListenerAfterRemoval(t, mockPublisher,
+            publisherAddressAndPort, function onTestDone() {
+                mockPublisher.on('close', function onPublisherExited() {
+                    t.end();
                 });
-            });
-        });
 
-        listener.on('connection-end', function () {
-            client.get(statsPath, function (err, req, res, obj) {
-                var regCount = Object.keys(obj.registrations).length;
-                t.equal(obj.listeners, 1, 'listener count 1');
-                t.equal(regCount, 1, 'length 1');
+                mockPublisher.close();
             });
-        });
-
-        listener2.on('connection-end', function () {
-            client.get(statsPath, function (err, req, res, obj) {
-                var regCount = Object.keys(obj.registrations).length;
-                t.equal(obj.listeners, 0, 'listener count 0');
-                t.equal(regCount, 0, 'length 0');
-                setTimeout(function () {
-                    publisher.kill('SIGHUP');
-                }, 1000);
-            });
-        });
     });
+});
 
-    publisher.on('close', function (code) {
-        // console.log('child process exited with code ' + code);
-        t.end();
+test('test publisher change feed stats after removal and srv routes mounted ' +
+    'after creation', function (t) {
+    startMockPublisher(t, {
+        nbPrimaryChangesToPublish: 0,
+        nbSecondaryChangesToPublish: 0,
+        nbMountSrvRoutesAfterCreate: 1
+    }, function onMockPublisherStarted(mockPublisher, publisherAddressAndPort) {
+        testChangefeedStatsWithListenerAfterRemoval(t, mockPublisher,
+            publisherAddressAndPort, function onTestDone() {
+                mockPublisher.on('close', function onPublisherExited() {
+                    t.end();
+                });
+
+                mockPublisher.close();
+            });
     });
 });
