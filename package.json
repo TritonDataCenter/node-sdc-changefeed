@@ -15,7 +15,7 @@
     "bunyan": "1.5.1",
     "jsprim": "1.4.0",
     "libuuid": "0.2.1",
-    "moray": "git+ssh://git@github.com:joyent/node-moray.git#fd5781bc25a9",
+    "moray": "git+https://github.com/joyent/node-moray.git#fd5781bc25a9",
     "posix-getopt": "1.2.0",
     "restify-clients": "1.1.1",
     "sprintf-js": "1.0.3",
