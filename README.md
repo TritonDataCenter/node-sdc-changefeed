@@ -5,7 +5,7 @@
 -->
 
 <!--
-    Copyright (c) 2017, Joyent, Inc.
+    Copyright (c) 2018, Joyent, Inc.
 -->
 
 # node-sdc-changefeed
@@ -54,7 +54,7 @@ $ changefeedsnoop -h 127.0.0.1 -p 8080 -r vm -s nic,alias | bunyan --color
 
 Publisher
 
-```
+```javascript
 var mod_bunyan = require('bunyan');
 var mod_changefeed = require('changefeed');
 var mod_restify = require('restify');
@@ -91,7 +91,7 @@ var publisher = mod_changefeed.createPublisher(options);
 
 Listener
 
-```
+```javascript
 var mod_bunyan = require('bunyan');
 var mod_changefeed = require('changefeed');
 
@@ -116,6 +116,20 @@ var options = {
 };
 
 var listener = mod_changefeed.createListener(options);
+
+listener.on('bootstrap', function (resource) {
+    // do bootstrap, then pipe to a change handler.
+    doBootstrap(resource);
+    listener.pipe(change_handler);
+});
+
+listener.on('error', function (err) {
+    console.log(err);
+});
+
+listener.on('connection-end', function () {
+    listener.unpipe(change_handler);
+});
 ```
 
 ## Documentation

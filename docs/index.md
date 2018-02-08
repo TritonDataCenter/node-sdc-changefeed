@@ -10,7 +10,7 @@ apisections:
 -->
 
 <!--
-    Copyright (c) 2017, Joyent, Inc.
+    Copyright (c) 2018, Joyent, Inc.
 -->
 
 Please see [Joyent Engineering
@@ -37,7 +37,7 @@ general set of guidelines that apply to all Joyent repositories.
         minTimeout: 10,
         retries: Infinity
     },
-    log: bunynan_instance,
+    log: bunyan_instance,
     maxAge: 28800,
     moray: {
         bucketName: 'name_of_feed_bucket',
@@ -75,12 +75,13 @@ restify server instance `restifyServer`.
         minTimeout: 10,
         retries: Infinity
     },
-    log: bunynan_instance,
+    log: bunyan_instance,
     url: 'http://localhost',
     instance: 'uuid_of_listener_service',
     service: 'listener_service_name',
     changeKind: changeKind
 }
+```
 
 # Objects
 
@@ -110,8 +111,6 @@ restify server instance `restifyServer`.
     subResources: ['resource_property1', 'resource_property2'],
     bootstrapRoute: '/resource_name'
 }
-```
-
 ```
 
 ## Registration
@@ -164,11 +163,15 @@ restify server instance `restifyServer`.
 
  * Emitted when the listener has disconnected from the publisher for any reason.
 
+## connection-reset
+
+* Emitted when the listener has received a 'connection reset' event.
+
 ## bootstrap
 
  * Emitted when the listener receives a bootstrap payload from the publisher.
 
-## Error
+## error
 
  * Emitted when the listener detects an out of state object from the publisher,
    or when the listener fails to connect to the publisher.
