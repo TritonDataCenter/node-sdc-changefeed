@@ -221,6 +221,37 @@ test('test listener creation', function (t) {
     });
 });
 
+test('test listener creation with multiple publishers', function (t) {
+
+    var mockPublisher = new MockPublisher({
+        nbPrimaryChangesToPublish: 10,
+        nbSecondaryChangesToPublish: 5
+    });
+
+    var mockPublisher2 = new MockPublisher({
+        nbPrimaryChangesToPublish: 10,
+        nbSecondaryChangesToPublish: 5
+    });
+
+    mockPublisher.start(function onStart(startErr, publisherHttpSrvInfo) {
+        if (startErr) {
+            t.ifError(startErr, 'mock publisher should start successfully');
+            t.end();
+        } else {
+            testListener(t, mockPublisher, publisherHttpSrvInfo);
+        }
+    });
+
+    mockPublisher2.start(function onStart2(startErr, publisherHttpSrvInfo) {
+        if (startErr) {
+            t.ifError(startErr, 'mock publisher should start successfully');
+            t.end();
+        } else {
+            testListener(t, mockPublisher2, publisherHttpSrvInfo);
+        }
+    });
+});
+
 test('test listener backoff', function (t) {
     var mockPublisher = new MockPublisher({
         nbPrimaryChangesToPublish: 1,

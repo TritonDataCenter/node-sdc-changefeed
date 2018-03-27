@@ -26,6 +26,10 @@ var options = {
     changeKind: {
         resource: 'vm',
         subResources: ['nic', 'alias']
+    },
+    zk: {
+        servers: [ { address: '192.168.9.6', port: 2181 } ],
+        sessionTimeout: 10000
     }
 };
 var options2 = {
@@ -40,6 +44,10 @@ var options2 = {
     changeKind: {
         resource: 'vm',
         subResources: ['nic']
+    },
+    zk: {
+        servers: [ { address: '192.168.9.6', port: 2181 } ],
+        sessionTimeout: 10000
     }
 };
 

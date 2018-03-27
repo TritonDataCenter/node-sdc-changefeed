@@ -32,10 +32,10 @@ var options = {
         stream: process.stderr
     }),
     moray: {
-        bucketName: 'z_change_bucket',
-        host: '10.99.99.17',
+        bucketName: 'z_ha_change_bucket',
+        host: '192.168.10.12',
         resolvers: {
-            resolvers: ['10.99.99.11']
+            resolvers: ['192.168.10.6']
         },
         timeout: 200,
         minTimeout: 1000,
@@ -44,7 +44,11 @@ var options = {
     },
     restifyServer: server,
     resources: resources,
-    maxAge: 2
+    maxAge: 2,
+    zk: {
+        servers: [ { address: '192.168.10.6', port: 2181 } ],
+        sessionTimeout: 10000
+    }
 };
 
 function testPublisher(t, publisher, callback) {

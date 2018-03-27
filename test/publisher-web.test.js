@@ -220,7 +220,6 @@ function testChangefeedStatsWithListenerAfterRemoval(t, mockPublisher,
             var regCount = Object.keys(obj.registrations).length;
             t.equal(obj.listeners, 1, 'listener count 1');
             t.equal(regCount, 1, 'length 1');
-
             listener2.close();
         });
     });

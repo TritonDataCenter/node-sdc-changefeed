@@ -42,9 +42,9 @@ var PUBLISHER_OPTIONS = {
     log: testLogger,
     moray: {
         bucketName: TEST_BUCKET_NAME,
-        host: '10.99.99.17',
+        host: '192.168.10.12',
         resolvers: {
-            resolvers: ['10.99.99.11']
+            resolvers: ['192.168.10.6']
         },
         timeout: 200,
         minTimeout: 1000,
@@ -52,7 +52,11 @@ var PUBLISHER_OPTIONS = {
         port: 2020
     },
     resources: resources,
-    maxAge: 2
+    maxAge: 2,
+    zk: {
+        servers: [ { address: '192.168.9.6', port: 2181 } ],
+        sessionTimeout: 10
+    }
 };
 
 function MockPublisher(options) {
