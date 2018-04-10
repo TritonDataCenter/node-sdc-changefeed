@@ -17,11 +17,11 @@
     "libuuid": "0.2.1",
     "moray": "git+https://github.com/joyent/node-moray.git#fd5781bc25a9",
     "posix-getopt": "1.2.0",
-    "restify-clients": "1.1.1",
+    "restify-clients": "1.5.3",
     "sprintf-js": "1.0.3",
     "vasync": "1.6.3",
     "vstream": "0.1.0",
-    "watershed": "0.3.3"
+    "watershed": "0.4.0"
   },
   "devDependencies": {
     "tape": "4.2.2",
