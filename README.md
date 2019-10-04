@@ -10,10 +10,7 @@
 
 # node-sdc-changefeed
 
-This repository is part of the Joyent Triton project. See the [contribution
-guidelines](https://github.com/joyent/triton/blob/master/CONTRIBUTING.md) --
-*Triton does not use GitHub PRs* -- and general documentation at the main
-[Triton project](https://github.com/joyent/triton) page.
+This repository is part of the Joyent [Triton project](https://github.com/joyent/triton).
 
 SDC Changefeed provides support for publishing and listening to change
 feeds in Triton via Node.js libraries and a CLI.
