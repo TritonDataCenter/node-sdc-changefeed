@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (c) 2017, Joyent, Inc.
+ * Copyright 2020 Joyent, Inc.
  */
 
 /* Test the publisher components */
@@ -16,7 +16,7 @@ var mod_events = require('events');
 var mod_jsprim = require('jsprim');
 var mod_moray = require('moray');
 var mod_restify = require('restify');
-var mod_libuuid = require('libuuid');
+var uuidv4 = require('uuid/v4');
 var mod_util = require('util');
 var mod_vasync = require('vasync');
 
@@ -105,18 +105,18 @@ function publishChanges(publisher, options) {
     var nbPrimaryChangesToPublish = options.nbPrimaryChanges;
     var nbSecondaryChangesToPublish = options.nbSecondaryChanges;
     for (var i = 0; i < nbPrimaryChangesToPublish; i++) {
-        testChange.changedResourceId = mod_libuuid.create();
+        testChange.changedResourceId = uuidv4();
         publisher.publish(testChange, publishHandler);
     }
     for (var j = 0; j < nbSecondaryChangesToPublish; j++) {
-        testChange2.changedResourceId = mod_libuuid.create();
+        testChange2.changedResourceId = uuidv4();
         publisher.publish(testChange2, publishHandler);
     }
 
     if (options.publishBonusRound) {
         setInterval(function () {
             for (var p = 0; p < nbPrimaryChangesToPublish; p++) {
-                testChange.changedResourceId = mod_libuuid.create();
+                testChange.changedResourceId = uuidv4();
                 publisher.publish(testChange, publishHandler);
             }
         }, 2000);
@@ -209,8 +209,9 @@ MockPublisher.prototype.closeClientConnections =
     var websocket;
 
     for (instance in self.publisher.websockets) {
-        websocket = self.publisher.websockets[instance];
-        websocket.destroy();
+        var vm = self.publisher.websockets[instance];
+        websocket = self.publisher.registrations.vm[vm].websocket;
+        websocket.end('Closing all client connections');
     }
 };
 
