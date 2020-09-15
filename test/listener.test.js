@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (c) 2017, Joyent, Inc.
+ * Copyright 2020 Joyent, Inc.
  */
 
 /* Test the listener components */
@@ -15,7 +15,6 @@ var test = require('tape');
 var mod_assert = require('assert-plus');
 var mod_bunyan = require('bunyan');
 var mod_listener = require('../lib/listener');
-var mod_spawn = require('child_process').spawn;
 
 var MockPublisher = require('./helper/mock-publisher');
 
@@ -131,7 +130,7 @@ function testListenerBackoff(t, mockPublisher, publisherAddressAndPort) {
     mod_assert.number(publisherAddressAndPort.port,
         'publisherAddressAndPort.port');
 
-    t.plan(8);
+    t.plan(5);
 
     var listenerOpts = {
         log: mod_bunyan.createLogger({
@@ -205,7 +204,6 @@ function testListenerBackoff(t, mockPublisher, publisherAddressAndPort) {
 }
 
 test('test listener creation', function (t) {
-
     var mockPublisher = new MockPublisher({
         nbPrimaryChangesToPublish: 10,
         nbSecondaryChangesToPublish: 5

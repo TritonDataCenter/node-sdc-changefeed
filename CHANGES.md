@@ -36,3 +36,6 @@
  * Add `Publisher.prototype.mountRestifyServerRoutes(restifyServer)` to the
    `Publisher`'s API.
  * Make `Listener.prototype.close` an alias for `Listener.prototype._endSocket`.
+
+## 1.5.1
+ * switch to 'uuid' package for UUID generation.
