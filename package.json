@@ -1,7 +1,7 @@
 {
   "name": "changefeed",
   "description": "Change Feed Modules",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "author": "Joyent (joyent.com)",
   "repository": {
     "type": "git",
@@ -14,7 +14,7 @@
     "backoff": "2.4.1",
     "jsprim": "1.4.0",
     "uuid": "~3.4.0",
-    "moray": "~4.1.1",
+    "moray": "~4.1.2",
     "posix-getopt": "1.2.0",
     "restify-clients": "1.5.3",
     "semver": "5.5.0",
