@@ -39,3 +39,7 @@
 
 ## 1.5.1
  * switch to 'uuid' package for UUID generation.
+
+## 1.5.2
+ * Bump to moray@4.1.2 (node-fast@3.1.2 which uses microtime@3.0.0) so we can
+ run this with node >= v6.14.2.
