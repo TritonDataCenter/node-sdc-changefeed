@@ -1,7 +1,7 @@
 {
   "name": "changefeed",
   "description": "Change Feed Modules",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "author": "Joyent (joyent.com)",
   "repository": {
     "type": "git",
